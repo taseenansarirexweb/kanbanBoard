@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid p-2 bg-light">
+        <h1 class="text-info">Kanban Board</h1>
+    </div>
+    <div class="container-fluid p-2 row">
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Add Work" name="works" value="" on>
+            <button type="button" class="btn btn-outline-primary m-2" onclick="addWork()">ADD WORK</button>
+        </div>
+    </div>
+    <div class="container row">
+        <h4 class="col m-2">To Do</h4>
+        <h4 class="col m-2">In progress</h4>
+        <h4 class="col m-2">Complete</h4>
+    </div>
+    <div class="container row">
+        <div class="container bg-light col m-2 p-2" id="todo" ondrop="drop(event,id)" ondragover="allowDrop(event,id)">
+        </div>
+        <div class="container bg-light col m-2" id="progress" ondrop="drop(event,id)" ondragover="allowDrop(event,id)">
+        </div>
+        <div class="container bg-light col m-2" id="complete" ondrop="drop(event,id)" ondragover="allowDrop(event,id)">
+
+        </div>
+    </div>
+
+
+
+    <script>
+        let todo = [];
+        let list1 = '';
+        let itemId = '';
+        let boardId = '';
+        function drag(ev, id) {
+            itemId = id;
+            // Set the drag's format and data. Use the event target's id for the data
+            ev.dataTransfer.setData("text/plain", ev.target.id);
+        }
+
+        function allowDrop(ev, id) {
+            boardId = id;
+            console.log(boardId)
+            console.log("dragOver");
+            ev.preventDefault();
+        }
+
+        function drop(ev, id) {
+            console.log("Drop");
+            console.log(boardId)
+            if (id == 'todo') {
+                list1 += `<div class="container bg-success" id ="${itemId}" draggable="true" ondragstart="drag(event,id)">
+                            <p>${todo[itemId]}</p>
+                        </div>`;
+            }
+            else {
+                list1 = list1.replace(`<div class="container bg-success" id ="${itemId}" draggable="true" ondragstart="drag(event,id)">
+                            <p>${todo[itemId]}</p>
+                        </div>`, '');
+            }
+            ev.preventDefault();
+            // Get the data, which is the id of the drop target
+            var data = ev.dataTransfer.getData("text");
+            ev.target.appendChild(document.getElementById(data));
+            // Clear the drag data cache (for all formats/types)
+            ev.dataTransfer.clearData();
+        }
+        function addWork() {
+            let data = document.getElementsByName('works')[0].value
+            todo.push(data);
+            list1 += `<div class="container bg-success" id ="${todo.length - 1}" draggable="true" ondragstart="drag(event,id)">
+                            <p>${todo[todo.length - 1]}</p>
+                        </div>`
+            document.getElementById('todo').innerHTML = list1;
+            document.getElementsByName('works')[0].value = '';
+        }
+        function display() {
+            for (let i = 0; i < todo.length; i++) {
+                list1 += `<div class="container bg-success" id ="${i}" draggable="true" ondragstart="drag(event,id)">
+                            <p>${todo[i]}</p>
+                        </div>`;
+            }
+            document.getElementById('todo').innerHTML = list1;
+        }
+        display()
+
+    </script>
+</body>
+
+</html>
