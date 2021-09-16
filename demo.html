@@ -51,7 +51,12 @@
 
             <script>
                 let item = '';
-                let id = 0;
+                let delItem = [];
+                let todo = [];
+                let todos = [];
+                let work = `<div class="container bg-info" id ="${todo.length}" draggable="true" ondragstart="drag(event)">
+                            <h4 class="text-body">${item}</h4>
+                        </div>`;
                 let works = '';
                 function drag(ev) {
                     // Set the drag's format and data. Use the event target's id for the data
@@ -60,8 +65,36 @@
 
                 function allowDrop(ev) {
                     console.log("dragOver");
-                    // Cancel the event if it cancelable and send to the default position.
                     ev.preventDefault();
+                }
+                function shiftData(data, ev) {
+                    if (ev.target.id == 'progress' || ev.target.id == 'complete' && todo[data]) {
+
+                        delItem.push({ 'id': data, 'workName': todo[data] });
+                        todos.splice(data, data + 1);
+                        todo.splice(data, data + 1);
+                        return data
+                    }
+                    else if (ev.target.id == 'todo') {
+                        let j = 0;
+                        console.log(todos, todo, delItem)
+                        for (i of delItem) {
+                            if (i.id == data) {
+                                todo.push(i.workName);
+                                todos.push({
+                                    'workName': i.workName, 'work': `<div class="container bg-info" id ="${todo.length - 1}" draggable="true" ondragstart="drag(event,id)">
+                                    <h4 class="text-white">${i.workName}</h4>
+                                    </div>`})
+                                delItem.splice(j, j + 1);
+                                j += 1;
+                                return todo.length - 1;
+                            }
+                        }
+
+                    }
+                    else {
+                        return data;
+                    }
                 }
 
                 function drop(ev) {
@@ -69,37 +102,44 @@
                     ev.preventDefault();
                     // Get the data, which is the id of the drop target
                     let data = ev.dataTransfer.getData("text");
+                    console.log(data)
+                    data = shiftData(data, ev);
+                    console.log(data)
                     ev.target.appendChild(document.getElementById(data));
                     // Clear the drag data cache (for all formats/types)
                     ev.dataTransfer.clearData();
                 }
-                function del(ev) { //this function is used to delete item
+                function del(ev) {
                     console.log("delete");
                     ev.preventDefault();
                     // Get the data, which is the id of the drop target
                     let data = ev.dataTransfer.getData("text");
                     ev.target.appendChild(document.getElementById(data));
+                    todos.splice(data, data + 1);
+                    todo.splice(data, data + 1);
+                    ev.target.remove(document.getElementById(data));
+                    document.getElementById('deleteBox').innerHTML = `<div id="del" ondrop="del(event)" ondragover="allowDrop(event)">
+                <p style="text-align: center;">Delete</p>
+            <div>`
                     // Clear the drag data cache (for all formats/types)
-                    document.getElementById('deleteBox').innerHTML = 
-                    `<div id="del" ondrop="del(event)" ondragover="allowDrop(event)">
-                                                                        <p style="text-align: center;">Delete</p>
-                                                                        <div>`;
                     ev.dataTransfer.clearData();
 
                 }
 
-                function addWork() { //this function is used to add item to todo list.
+                function addWork() {
                     works = '';
-                    id+=1; //whenever user try to create new item it always set new id to the element.
                     item = document.getElementsByName('works')[0].value;
-                    works = document.getElementById('todo').innerHTML;
-                    works +=`<div class="container bg-warning" id ="${id}" draggable="true" ondragstart="drag(event,id)">
-                        <h4 class="text-white">${item}</h4>
-                    </div>`;                    
-                    document.getElementById('todo').innerHTML= works;
-                    
+                    todo.push(item);
+                    todos.push({
+                        'workName': item, 'work': `<div class="container bg-info" id ="${todo.length - 1}" draggable="true" ondragstart="drag(event,id)">
+                            <h4 class="text-white">${item}</h4>
+                        </div>`});
+                    for (let i of todos) {
+                        works += i.work;
+                    }
+                    console.log(todo, todos, delItem);
+                    document.getElementById('todo').innerHTML = works;
                     document.getElementsByName('works')[0].value = '';
-                    //set the input field blank.
 
                 }
 
